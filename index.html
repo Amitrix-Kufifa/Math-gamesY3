@@ -3,257 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wombat Walk Math</title>
+    <title>Aussie Math Adventures</title>
     <style>
-        /* ACT School Colours Vibe */
-        body {
-            font-family: 'Comic Sans MS', 'Arial', sans-serif; /* Kid friendly font */
-            background-color: #e0f7fa;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-            touch-action: manipulation; /* Prevents zooming on double tap */
+        :root {
+            --primary: #00897b;
+            --accent: #ffca28;
+            --bg: #e0f2f1;
+            --font: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
         }
 
-        h1 { color: #006064; }
+        body {
+            font-family: var(--font);
+            background-color: var(--bg);
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            user-select: none;
+        }
 
-        .game-container {
-            max-width: 600px;
-            margin: 0 auto;
+        /* --- Layout Containers --- */
+        .screen { display: none; max-width: 600px; margin: 0 auto; }
+        .active { display: block; animation: fadeIn 0.5s; }
+
+        .card {
             background: white;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            margin-top: 20px;
         }
 
-        /* The Wombat Visuals */
-        .scene {
-            background-color: #8bc34a; /* Grass */
-            height: 150px;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border-bottom: 10px solid #558b2f;
+        h1 { color: #004d40; margin-bottom: 5px; }
+        h2 { color: #00796b; }
+        p { font-size: 18px; color: #555; }
+
+        /* --- Inputs & Buttons --- */
+        input {
+            font-size: 24px; padding: 10px; border-radius: 10px;
+            border: 2px solid #aaa; width: 80%; text-align: center;
+            font-family: var(--font); margin-bottom: 10px;
         }
 
-        .wombat {
-            font-size: 60px;
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            transition: left 0.5s ease;
-        }
-
-        .target {
-            font-size: 60px;
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-        }
-
-        /* Buttons and Inputs */
-        .btn-mode {
-            background-color: #0097a7;
+        button {
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 15px;
-            margin: 5px;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-            max-width: 200px;
-        }
-
-        .btn-mode:hover { background-color: #006064; }
-
-        .question-box {
-            font-size: 40px;
-            font-weight: bold;
-            color: #333;
-            margin: 20px 0;
-        }
-
-        .input-area { display: none; }
-
-        input[type="number"] {
-            font-size: 30px;
-            padding: 10px;
-            width: 100px;
-            text-align: center;
-            border-radius: 8px;
-            border: 2px solid #ccc;
-        }
-
-        .btn-submit {
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .message {
-            height: 30px;
+            padding: 12px 24px;
             font-size: 20px;
-            margin-top: 10px;
-            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-family: var(--font);
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+        button.secondary { background-color: #78909c; }
+        button:disabled { background-color: #cfd8dc; cursor: not-allowed; opacity: 0.7; }
+
+        /* --- Level Select Grid --- */
+        .mission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .mission-btn {
+            height: 120px;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 4px solid var(--primary);
+            color: #333;
+        }
+        .mission-btn.locked {
+            background: #eee; border-color: #ccc; color: #999;
+        }
+        .stars { color: gold; font-size: 24px; margin-top: 5px; }
+
+        /* --- Game Area --- */
+        .progress-bar {
+            width: 100%; height: 20px; background: #ddd;
+            border-radius: 10px; overflow: hidden; margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%; background: #76ff03; width: 0%; transition: width 0.3s;
+        }
+        .question { font-size: 50px; margin: 30px 0; font-weight: bold; color: #333; }
+        .feedback { height: 30px; font-size: 20px; font-weight: bold; }
+        .correct-text { color: green; }
+        .wrong-text { color: red; }
+
+        /* --- Rewards --- */
+        .medal { font-size: 100px; animation: popIn 0.6s; }
+        
+        /* --- Balloon Pop Game --- */
+        #balloon-canvas {
+            background: skyblue;
+            border-radius: 15px;
+            cursor: crosshair;
+            touch-action: none;
         }
 
-        .correct { color: green; }
-        .wrong { color: red; }
-
-        /* Reward visual */
-        .confetti {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="2" fill="gold"/></svg>');
-            background-size: 20px 20px;
-            animation: fall 2s linear infinite;
-        }
-
-        @keyframes fall { from {background-position: 0 0;} to {background-position: 0 100vh;} }
+        /* Animations */
+        @keyframes fadeIn { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+        @keyframes popIn { 0% {transform: scale(0);} 80% {transform: scale(1.2);} 100% {transform: scale(1);} }
 
     </style>
 </head>
 <body>
 
-    <div class="confetti" id="confetti"></div>
-
-    <div class="game-container">
-        <h1>🐨 Wombat Walk Math 🦘</h1>
-        
-        <!-- Mode Selection -->
-        <div id="menu">
-            <p>Help Wally get to Black Mountain!</p>
-            <button class="btn-mode" onclick="startGame('add')">Addition (+)</button>
-            <button class="btn-mode" onclick="startGame('sub')">Subtraction (-)</button>
-            <button class="btn-mode" onclick="startGame('mul')">Multiplication (x)</button>
-        </div>
-
-        <!-- Game Area -->
-        <div id="game" class="input-area">
-            <div class="scene">
-                <div class="wombat" id="wombat">🐨</div>
-                <div class="target" id="target">🌲</div>
-            </div>
-
-            <div class="question-box" id="question">2 + 2 = ?</div>
-            
-            <input type="number" id="answerInput" placeholder="?" inputmode="numeric">
-            <button class="btn-submit" onclick="checkAnswer()">Go!</button>
-            
-            <div class="message" id="message"></div>
+    <!-- 1. PROFILE SCREEN -->
+    <div id="screen-profile" class="screen active">
+        <div class="card">
+            <h1>🎓 Math Adventures</h1>
+            <p>Welcome! What is your name?</p>
+            <input type="text" id="username" placeholder="Enter name..." maxlength="15">
             <br>
-            <button onclick="showMenu()" style="background:none; border:none; color:grey; text-decoration:underline; cursor:pointer;">Back to Menu</button>
+            <button onclick="saveProfile()">Let's Play!</button>
+        </div>
+    </div>
+
+    <!-- 2. MISSION SELECT -->
+    <div id="screen-missions" class="screen">
+        <div class="card">
+            <h2 id="greeting">Hi there!</h2>
+            <p>Choose your mission:</p>
+            <div class="mission-grid">
+                <button class="mission-btn" onclick="startLevel(1)" id="lvl1">
+                    🐨 Koala Climb<br><small>(Addition)</small>
+                    <div class="stars" id="star1"></div>
+                </button>
+                <button class="mission-btn locked" onclick="startLevel(2)" id="lvl2" disabled>
+                    🐜 Echidna Eats<br><small>(Subtraction)</small>
+                    <div class="stars" id="star2">🔒</div>
+                </button>
+                <button class="mission-btn locked" onclick="startLevel(3)" id="lvl3" disabled>
+                    🦘 Kangaroo Hop<br><small>(Patterns)</small>
+                    <div class="stars" id="star3">🔒</div>
+                </button>
+                <button class="mission-btn locked" onclick="startLevel(4)" id="lvl4" disabled>
+                    🐊 Croc Crunch<br><small>(Multiplication)</small>
+                    <div class="stars" id="star4">🔒</div>
+                </button>
+            </div>
+            <br>
+            <button class="secondary" onclick="resetProgress()">Reset Profile</button>
+        </div>
+    </div>
+
+    <!-- 3. GAME SCREEN -->
+    <div id="screen-game" class="screen">
+        <div class="card">
+            <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+            <h2 id="levelTitle">Level 1</h2>
+            <div class="question" id="questionText">2 + 2</div>
+            <div class="feedback" id="feedbackText"></div>
+            
+            <input type="number" id="answerInput" inputmode="numeric" placeholder="?">
+            <br>
+            <button onclick="checkAnswer()">Submit</button>
+            <br><br>
+            <button class="secondary" onclick="showMissions()">Back to Map</button>
+        </div>
+    </div>
+
+    <!-- 4. REWARD SCREEN -->
+    <div id="screen-reward" class="screen">
+        <div class="card">
+            <div class="medal">🥇</div>
+            <h1>MISSION COMPLETE!</h1>
+            <p>You are a math superstar!</p>
+            <button onclick="playBonusGame()">🎈 Play Balloon Pop!</button>
+            <br>
+            <button class="secondary" onclick="showMissions()">Back to Map</button>
+        </div>
+    </div>
+
+    <!-- 5. BONUS GAME -->
+    <div id="screen-bonus" class="screen">
+        <div class="card">
+            <h2>Pop the Balloons!</h2>
+            <p>Score: <span id="bonusScore">0</span></p>
+            <canvas id="balloon-canvas" width="300" height="400"></canvas>
+            <br>
+            <button class="secondary" onclick="showMissions()">Finish</button>
         </div>
     </div>
 
     <script>
-        let currentMode = 'add';
-        let num1, num2, correctAnswer;
-        let score = 0;
-        const winningScore = 10; // How many correct answers to win
-        
-        const wombat = document.getElementById('wombat');
-        const questionEl = document.getElementById('question');
-        const inputEl = document.getElementById('answerInput');
-        const messageEl = document.getElementById('message');
+        // --- STATE MANAGEMENT ---
+        let state = {
+            name: "",
+            level: 1, // Current highest unlocked level
+            currentScore: 0,
+            targetScore: 10,
+            currentLevelId: 1,
+            num1: 0, num2: 0, ans: 0
+        };
 
-        // Listen for "Enter" key
-        inputEl.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                checkAnswer();
+        // Load from LocalStorage
+        function init() {
+            const saved = localStorage.getItem('mathGameData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.name = data.name;
+                state.level = data.level;
+                showMissions();
             }
-        });
-
-        function showMenu() {
-            document.getElementById('menu').style.display = 'block';
-            document.getElementById('game').style.display = 'none';
-            score = 0;
-            updatePosition();
         }
 
-        function startGame(mode) {
-            currentMode = mode;
-            score = 0;
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            updatePosition();
+        function saveProfile() {
+            const name = document.getElementById('username').value;
+            if (!name) return;
+            state.name = name;
+            state.level = 1;
+            saveData();
+            showMissions();
+        }
+
+        function saveData() {
+            localStorage.setItem('mathGameData', JSON.stringify({
+                name: state.name,
+                level: state.level
+            }));
+        }
+
+        function resetProgress() {
+            if(confirm("Are you sure you want to erase progress?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // --- NAVIGATION ---
+        function hideAll() {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        }
+
+        function showMissions() {
+            hideAll();
+            document.getElementById('screen-missions').classList.add('active');
+            document.getElementById('greeting').innerText = `G'day, ${state.name}!`;
+            updateLevelButtons();
+        }
+
+        function updateLevelButtons() {
+            for(let i=1; i<=4; i++) {
+                const btn = document.getElementById(`lvl${i}`);
+                const star = document.getElementById(`star${i}`);
+                
+                if (i <= state.level) {
+                    btn.classList.remove('locked');
+                    btn.disabled = false;
+                    if (i < state.level) star.innerText = "⭐⭐⭐"; // Completed
+                    else star.innerText = "⭐"; // Current
+                } else {
+                    btn.classList.add('locked');
+                    btn.disabled = true;
+                    star.innerText = "🔒";
+                }
+            }
+        }
+
+        // --- MATH LOGIC ---
+        function startLevel(lvl) {
+            state.currentLevelId = lvl;
+            state.currentScore = 0;
+            hideAll();
+            document.getElementById('screen-game').classList.add('active');
+            
+            const titles = ["Koala Climb (+)", "Echidna Eats (-)", "Kangaroo Hop (Patterns)", "Croc Crunch (x)"];
+            document.getElementById('levelTitle').innerText = titles[lvl-1];
+            updateProgress();
             generateQuestion();
         }
 
         function generateQuestion() {
-            messageEl.innerText = "";
-            inputEl.value = "";
-            inputEl.focus();
+            document.getElementById('answerInput').value = "";
+            document.getElementById('answerInput').focus();
+            document.getElementById('feedbackText').innerText = "";
 
-            if (currentMode === 'add') {
-                // Year 3: Sums up to 30ish
-                num1 = Math.floor(Math.random() * 15) + 1;
-                num2 = Math.floor(Math.random() * 15) + 1;
-                correctAnswer = num1 + num2;
-                questionEl.innerText = `${num1} + ${num2} = ?`;
+            const lvl = state.currentLevelId;
+
+            if (lvl === 1) { // Addition to 50
+                state.num1 = Math.floor(Math.random() * 25) + 1;
+                state.num2 = Math.floor(Math.random() * 25) + 1;
+                state.ans = state.num1 + state.num2;
+                document.getElementById('questionText').innerText = `${state.num1} + ${state.num2} = ?`;
             } 
-            else if (currentMode === 'sub') {
-                // Year 3: Answer is positive
-                num1 = Math.floor(Math.random() * 20) + 5;
-                num2 = Math.floor(Math.random() * num1); // Ensure num2 is smaller than num1
-                correctAnswer = num1 - num2;
-                questionEl.innerText = `${num1} - ${num2} = ?`;
-            } 
-            else if (currentMode === 'mul') {
-                // Year 3 Focus: 2, 3, 5, 10
-                const factors = [2, 3, 5, 10];
-                num1 = factors[Math.floor(Math.random() * factors.length)];
-                num2 = Math.floor(Math.random() * 10) + 1;
-                correctAnswer = num1 * num2;
-                questionEl.innerText = `${num1} x ${num2} = ?`;
+            else if (lvl === 2) { // Subtraction
+                state.num1 = Math.floor(Math.random() * 40) + 10;
+                state.num2 = Math.floor(Math.random() * (state.num1 - 5)) + 1;
+                state.ans = state.num1 - state.num2;
+                document.getElementById('questionText').innerText = `${state.num1} - ${state.num2} = ?`;
+            }
+            else if (lvl === 3) { // Patterns (Skip Counting)
+                const steps = [2, 5, 10];
+                const step = steps[Math.floor(Math.random() * steps.length)];
+                const start = Math.floor(Math.random() * 5) * step;
+                // Example: 2, 4, 6, ?
+                state.ans = start + (step * 3);
+                document.getElementById('questionText').innerText = `${start}, ${start+step}, ${start+(step*2)}, ?`;
+            }
+            else if (lvl === 4) { // Multiplication
+                const facts = [2, 3, 5, 10];
+                state.num1 = facts[Math.floor(Math.random() * facts.length)];
+                state.num2 = Math.floor(Math.random() * 10) + 1;
+                state.ans = state.num1 * state.num2;
+                document.getElementById('questionText').innerText = `${state.num1} x ${state.num2} = ?`;
             }
         }
 
         function checkAnswer() {
-            const playerAns = parseInt(inputEl.value);
+            const userAns = parseInt(document.getElementById('answerInput').value);
+            const feedback = document.getElementById('feedbackText');
 
-            if (playerAns === correctAnswer) {
-                messageEl.innerText = "Good job! 🌟";
-                messageEl.className = "message correct";
-                score++;
-                updatePosition();
+            if (userAns === state.ans) {
+                feedback.innerText = "Correct! Nice work!";
+                feedback.className = "feedback correct-text";
+                state.currentScore++;
+                updateProgress();
                 
-                if(score >= winningScore) {
-                    winGame();
+                if (state.currentScore >= state.targetScore) {
+                    levelComplete();
                 } else {
-                    setTimeout(generateQuestion, 1000); // Wait 1 sec then new question
+                    setTimeout(generateQuestion, 1000);
                 }
             } else {
-                messageEl.innerText = "Try again! You can do it.";
-                messageEl.className = "message wrong";
-                inputEl.value = "";
-                inputEl.focus();
+                feedback.innerText = "Try again!";
+                feedback.className = "feedback wrong-text";
             }
         }
 
-        function updatePosition() {
-            // Move wombat across screen based on score (0 to 10)
-            const percentage = (score / winningScore) * 80; // Max 80% so it doesn't overlap tree
-            wombat.style.left = percentage + "%";
+        function updateProgress() {
+            const pct = (state.currentScore / state.targetScore) * 100;
+            document.getElementById('progFill').style.width = pct + "%";
         }
 
-        function winGame() {
-            questionEl.innerText = "YOU DID IT! 🎉";
-            document.getElementById('confetti').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('confetti').style.display = 'none';
-                showMenu();
-            }, 4000);
+        function levelComplete() {
+            // Unlock next level if at current max
+            if (state.currentLevelId === state.level) {
+                state.level++;
+                saveData();
+            }
+            hideAll();
+            document.getElementById('screen-reward').classList.add('active');
         }
+
+        // --- BONUS GAME (BALLOONS) ---
+        let canvas, ctx, balloons = [], animationId;
+        
+        function playBonusGame() {
+            hideAll();
+            document.getElementById('screen-bonus').classList.add('active');
+            canvas = document.getElementById('balloon-canvas');
+            ctx = canvas.getContext('2d');
+            balloons = [];
+            document.getElementById('bonusScore').innerText = "0";
+            
+            // Handle Clicks
+            canvas.addEventListener('mousedown', popBalloon);
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // prevent double firing
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent("mousedown", {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }, {passive: false});
+
+            gameLoop();
+            spawnBalloons();
+        }
+
+        function spawnBalloons() {
+            if(!document.getElementById('screen-bonus').classList.contains('active')) return;
+            
+            const colors = ['#ff5252', '#448aff', '#69f0ae', '#ffd740', '#e040fb'];
+            const b = {
+                x: Math.random() * (canvas.width - 30),
+                y: canvas.height + 30,
+                r: 20,
+                speed: Math.random() * 2 + 1,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            };
+            balloons.push(b);
+            setTimeout(spawnBalloons, 800);
+        }
+
+        function gameLoop() {
+            if(!document.getElementById('screen-bonus').classList.contains('active')) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < balloons.length; i++) {
+                let b = balloons[i];
+                b.y -= b.speed;
+                
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fillStyle = b.color;
+                ctx.fill();
+                ctx.stroke();
+                
+                // Remove if off screen
+                if (b.y < -30) {
+                    balloons.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function popBalloon(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                let b = balloons[i];
+                let dist = Math.sqrt((x - b.x) ** 2 + (y - b.y) ** 2);
+                if (dist < b.r + 10) { // +10 specifically for forgiving touch area
+                    balloons.splice(i, 1);
+                    let score = parseInt(document.getElementById('bonusScore').innerText);
+                    document.getElementById('bonusScore').innerText = score + 1;
+                    break;
+                }
+            }
+        }
+
+        // Event Listener for Enter key in Math
+        document.getElementById('answerInput').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") checkAnswer();
+        });
+
+        // Start app
+        init();
+
     </script>
 </body>
 </html>
