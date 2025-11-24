@@ -2,513 +2,730 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Math Action Hero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canberra Maths Adventure</title>
     <style>
+        /* ACT School / Kid-Friendly Vibe */
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #222;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Prevent scrolling */
-            touch-action: none; /* Better touch support */
-            color: white;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background-color: #e0f7fa;
             text-align: center;
+            padding: 20px;
+            margin: 0;
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
         }
 
-        #game-container {
-            position: relative;
-            max-width: 600px;
-            height: 100vh;
-            margin: 0 auto;
-            background: #333;
-            overflow: hidden;
+        h1 {
+            color: #006064;
+            margin-top: 0;
         }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+        .tagline {
+            margin-top: 0;
+            color: #004d40;
+            font-size: 16px;
         }
 
-        /* UI Overlays */
-        .overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85);
-            z-index: 10;
+        .game-container {
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
-        .hidden { display: none !important; }
 
-        h1 { font-size: 40px; margin: 0 0 20px 0; color: #4db6ac; text-shadow: 2px 2px #000; }
-        h2 { font-size: 24px; color: #ffca28; }
-        p { font-size: 18px; color: #ccc; max-width: 80%; }
+        .game-screen {
+            display: none;
+        }
 
-        .btn {
-            background: #009688;
-            color: white;
+        /* Menu cards */
+        .game-card-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 650px) {
+            .game-card-grid {
+                flex-direction: row;
+            }
+        }
+
+        .game-card {
+            flex: 1;
+            background: #f1f8e9;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .game-card h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #33691e;
+        }
+
+        .game-card p {
+            font-size: 14px;
+            min-height: 48px;
+        }
+
+        .btn-primary, .btn-mode, .btn-answer, .btn-small, .btn-submit, .btn-back {
             border: none;
-            padding: 15px 30px;
-            font-size: 22px;
-            border-radius: 50px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
-            box-shadow: 0 5px 0 #00695c;
-            transition: transform 0.1s;
-            width: 250px;
             font-weight: bold;
         }
-        .btn:active { transform: translateY(5px); box-shadow: none; }
-        .btn-red { background: #e53935; box-shadow: 0 5px 0 #c62828; }
-        
-        /* HUD during game */
-        #hud {
-            position: absolute;
-            top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between;
-            pointer-events: none;
-            font-size: 24px; font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-        
-        /* Controls hint */
-        .controls-hint {
-            position: absolute; bottom: 20px; width: 100%;
-            text-align: center; font-size: 14px; color: #888;
-            pointer-events: none;
+
+        .btn-primary {
+            background-color: #0097a7;
+            color: white;
+            padding: 10px 16px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 180px;
         }
 
+        .btn-primary:hover {
+            background-color: #006064;
+        }
+
+        .btn-mode {
+            background-color: #0097a7;
+            color: white;
+            padding: 8px 10px;
+            margin: 3px;
+            font-size: 14px;
+        }
+
+        .btn-mode.active {
+            background-color: #004d40;
+        }
+
+        .btn-answer {
+            background-color: #ffb74d;
+            padding: 10px;
+            font-size: 20px;
+            margin: 5px;
+            min-width: 70px;
+        }
+
+        .btn-answer:hover {
+            background-color: #f57c00;
+        }
+
+        .btn-small {
+            background-color: #eeeeee;
+            padding: 6px 10px;
+            font-size: 14px;
+            margin: 3px;
+        }
+
+        .btn-small.active {
+            background-color: #c5e1a5;
+        }
+
+        .btn-submit {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin-left: 8px;
+        }
+
+        .btn-submit:hover {
+            background-color: #f57c00;
+        }
+
+        .btn-back {
+            margin-top: 12px;
+            background: none;
+            color: grey;
+            text-decoration: underline;
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .scene {
+            background-color: #8bc34a; /* Grass */
+            height: 150px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0 20px 0;
+            border-bottom: 10px solid #558b2f;
+        }
+
+        .wombat {
+            font-size: 60px;
+            position: absolute;
+            bottom: 10px;
+            left: 5%;
+            transition: left 0.4s ease;
+        }
+
+        .target {
+            font-size: 60px;
+            position: absolute;
+            bottom: 10px;
+            right: 5%;
+        }
+
+        .question-box {
+            font-size: 34px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .sub-question {
+            font-size: 20px;
+            margin: 8px 0 12px 0;
+            color: #555;
+        }
+
+        input[type="number"] {
+            font-size: 26px;
+            padding: 8px;
+            width: 90px;
+            text-align: center;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+        }
+
+        .message {
+            min-height: 26px;
+            font-size: 18px;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .correct { color: #2e7d32; }
+        .wrong { color: #d32f2f; }
+
+        .score-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 16px;
+            margin: 5px 0 10px 0;
+        }
+
+        .score-row span strong {
+            color: #004d40;
+        }
+
+        .answer-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .pill-row {
+            margin: 10px 0 15px 0;
+        }
+
+        .small-info {
+            font-size: 14px;
+            color: #555;
+            margin-top: 6px;
+        }
+
+        /* Reward visual */
+        .confetti {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            display: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="2" fill="gold"/></svg>');
+            background-size: 20px 20px;
+            animation: fall 2s linear infinite;
+            z-index: 999;
+        }
+
+        @keyframes fall {
+            from { background-position: 0 0; }
+            to   { background-position: 0 100vh; }
+        }
+
+        footer {
+            font-size: 12px;
+            color: #555;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    
+    <div class="confetti" id="confetti"></div>
+
     <!-- MAIN MENU -->
-    <div id="menu" class="overlay">
-        <h1>Math Action Hero</h1>
-        <p>Real games. Real math.</p>
-        <button class="btn" onclick="startGame('runner')">🦘 Wombat Runner</button>
-        <button class="btn" onclick="startGame('astro')">🚀 Astro Blaster</button>
-        <p style="font-size:14px; margin-top:20px">High Scores saved automatically!</p>
+    <div class="game-container" id="main-menu">
+        <h1>Canberra Maths Adventure</h1>
+        <p class="tagline">
+            No ads, no stress – just wombats, roos and numbers.
+        </p>
+
+        <div class="game-card-grid">
+            <div class="game-card">
+                <h2>🐨 Wombat Walk (+ − ×)</h2>
+                <p>Help Wally the Wombat walk all the way to Black Mountain by solving questions.</p>
+                <button class="btn-primary" onclick="openGame('wombat')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>🦘 Times Table Jump</h2>
+                <p>Quick-fire practice with the key Year 3 tables: 2, 3, 5 and 10.</p>
+                <button class="btn-primary" onclick="openGame('times')">Play</button>
+            </div>
+
+            <div class="game-card">
+                <h2>🦜 Place Value Patrol</h2>
+                <p>Hundreds, tens and ones. Crack the secret digit and earn stars.</p>
+                <button class="btn-primary" onclick="openGame('place')">Play</button>
+            </div>
+        </div>
     </div>
 
-    <!-- GAME OVER SCREEN -->
-    <div id="gameover" class="overlay hidden">
-        <h1>GAME OVER</h1>
-        <h2>Score: <span id="finalScore">0</span></h2>
-        <p id="highScoreMsg"></p>
-        <button class="btn" onclick="location.reload()">Menu</button>
-        <button class="btn btn-red" onclick="restartGame()">Try Again</button>
+    <!-- GAME 1: Wombat Walk -->
+    <div class="game-container game-screen" id="wombat-screen">
+        <h1>🐨 Wombat Walk Math</h1>
+        <p>Choose a mode and help Wally reach Black Mountain.</p>
+
+        <div class="pill-row">
+            <button class="btn-mode active" id="wombat-mode-add" onclick="wombatSetMode('add')">Addition (+)</button>
+            <button class="btn-mode" id="wombat-mode-sub" onclick="wombatSetMode('sub')">Subtraction (−)</button>
+            <button class="btn-mode" id="wombat-mode-mul" onclick="wombatSetMode('mul')">Multiplication (×)</button>
+        </div>
+
+        <div class="scene">
+            <div class="wombat" id="wombat-wombat">🐨</div>
+            <div class="target">🌲</div>
+        </div>
+
+        <div class="question-box" id="wombat-question">2 + 2 = ?</div>
+
+        <div>
+            <input type="number" id="wombat-answer" placeholder="?" inputmode="numeric">
+            <button class="btn-submit" onclick="wombatCheckAnswer()">Go!</button>
+        </div>
+
+        <div class="score-row">
+            <span>Steps: <strong><span id="wombat-score">0</span> / <span id="wombat-target-score">10</span></strong></span>
+        </div>
+
+        <div class="message" id="wombat-message"></div>
+
+        <button class="btn-back" onclick="goHome()">⬅ Back to Games</button>
     </div>
 
-    <!-- HUD -->
-    <div id="hud" class="hidden">
-        <div>Score: <span id="scoreDisplay">0</span></div>
-        <div id="livesDisplay">❤️❤️❤️</div>
+    <!-- GAME 2: Times Table Jump -->
+    <div class="game-container game-screen" id="times-screen">
+        <h1>🦘 Times Table Jump</h1>
+        <p>Tap the correct answer to help Joey jump along!</p>
+
+        <div class="pill-row">
+            <button class="btn-small active" id="times-table-mix" onclick="setTimesTable('mix')">Mix 2,3,5,10</button>
+            <button class="btn-small" id="times-table-2" onclick="setTimesTable(2)">×2</button>
+            <button class="btn-small" id="times-table-3" onclick="setTimesTable(3)">×3</button>
+            <button class="btn-small" id="times-table-5" onclick="setTimesTable(5)">×5</button>
+            <button class="btn-small" id="times-table-10" onclick="setTimesTable(10)">×10</button>
+        </div>
+
+        <div class="score-row">
+            <span>Score: <strong><span id="times-score">0</span></strong></span>
+            <span>Streak: <strong><span id="times-streak">0</span></strong></span>
+        </div>
+
+        <div class="question-box" id="times-question">2 × 3 = ?</div>
+
+        <div class="answer-options">
+            <button class="btn-answer" id="times-opt-0" onclick="timesCheckAnswer(this)"></button>
+            <button class="btn-answer" id="times-opt-1" onclick="timesCheckAnswer(this)"></button>
+            <button class="btn-answer" id="times-opt-2" onclick="timesCheckAnswer(this)"></button>
+        </div>
+
+        <div class="message" id="times-message"></div>
+
+        <button class="btn-back" onclick="goHome()">⬅ Back to Games</button>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-    
-    <div class="controls-hint" id="controlsHint"></div>
-</div>
+    <!-- GAME 3: Place Value Patrol -->
+    <div class="game-container game-screen" id="place-screen">
+        <h1>🦜 Place Value Patrol</h1>
+        <p>Read the number, then pick the correct digit.</p>
 
-<script>
-/** 
- * MATH ACTION HERO ENGINE
- * Single file game engine by Claude
- */
+        <div class="score-row">
+            <span>Score: <strong><span id="place-score">0</span></strong></span>
+        </div>
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let animationId;
-let gameMode = null; // 'runner' or 'astro'
+        <div class="question-box" id="place-number">384</div>
+        <div class="sub-question" id="place-question">What is the tens digit?</div>
 
-// Adjust canvas size
-function resize() {
-    canvas.width = document.getElementById('game-container').offsetWidth;
-    canvas.height = document.getElementById('game-container').offsetHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+        <div class="answer-options">
+            <button class="btn-answer" id="place-opt-0" onclick="placeCheckAnswer(this)"></button>
+            <button class="btn-answer" id="place-opt-1" onclick="placeCheckAnswer(this)"></button>
+            <button class="btn-answer" id="place-opt-2" onclick="placeCheckAnswer(this)"></button>
+        </div>
 
-// Game State
-let state = {
-    score: 0,
-    lives: 3,
-    speed: 0,
-    isPlaying: false,
-    question: null,
-    answers: [], // Objects on screen
-    player: { x: 0, y: 0, w: 50, h: 50, lane: 1 }, // Lane 0, 1, 2
-    lastSpawn: 0
-};
+        <div class="message" id="place-message"></div>
 
-// --- AUDIO (Synthesized beeps) ---
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-function playSound(type) {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    if(type === 'correct') {
-        osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === 'wrong') {
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    }
-}
+        <button class="btn-back" onclick="goHome()">⬅ Back to Games</button>
+    </div>
 
-// --- MATH GENERATOR ---
-function getMathQuestion() {
-    // Mix of Year 3 skills
-    const type = Math.random();
-    
-    if(type < 0.4) { // Addition
-        const a = Math.floor(Math.random()*20)+5;
-        const b = Math.floor(Math.random()*20)+5;
-        return { q: `${a} + ${b}`, a: a+b };
-    } 
-    else if (type < 0.7) { // Subtraction
-        const a = Math.floor(Math.random()*30)+10;
-        const b = Math.floor(Math.random()*(a-5))+1;
-        return { q: `${a} - ${b}`, a: a-b };
-    }
-    else { // Simple Mult
-        const facts = [2,3,5,10];
-        const a = facts[Math.floor(Math.random()*facts.length)];
-        const b = Math.floor(Math.random()*10)+1;
-        return { q: `${a} x ${b}`, a: a*b };
-    }
-}
+    <footer>
+        Built with ❤️ in Canberra. (Also: totally allowed for parent hints.)
+    </footer>
 
-// --- GAME: WOMBAT RUNNER ---
-const RUNNER = {
-    lanes: 3,
-    laneWidth: 0,
-    init: function() {
-        this.laneWidth = canvas.width / 3;
-        state.player.w = 60;
-        state.player.h = 60;
-        state.player.y = canvas.height - 100;
-        state.player.lane = 1;
-        state.speed = 4; // Vertical speed of gates
-        state.question = getMathQuestion();
-        state.answers = []; // These will be gates
-        spawnGates();
-        document.getElementById('controlsHint').innerText = "Tap Left/Right to switch lanes";
-    },
-    update: function() {
-        // Move gates down
-        state.answers.forEach(g => g.y += state.speed);
-        
-        // Spawn new gates if needed
-        if(state.answers.length > 0 && state.answers[0].y > canvas.height + 50) {
-            state.answers = []; // Clear old
-            state.question = getMathQuestion();
-            spawnGates();
-            state.speed += 0.2; // Get faster
+    <script>
+        /* ---------- SHARED NAV + CONFETTI ---------- */
+        const confetti = document.getElementById('confetti');
+
+        function fireConfetti(durationMs = 2000) {
+            confetti.style.display = 'block';
+            setTimeout(() => {
+                confetti.style.display = 'none';
+            }, durationMs);
         }
 
-        // Collision
-        const pLane = state.player.lane;
-        state.answers.forEach(g => {
-            if(!g.hit && g.y + 50 > state.player.y && g.y < state.player.y + state.player.h) {
-                // We are crossing the gate line
-                if(g.lane === pLane) {
-                    g.hit = true;
-                    if(g.isCorrect) {
-                        state.score += 10;
-                        playSound('correct');
-                    } else {
-                        state.lives--;
-                        playSound('wrong');
-                        checkGameOver();
-                    }
-                }
-            }
-        });
-    },
-    draw: function() {
-        // Background
-        ctx.fillStyle = "#4caf50"; // Grass
-        ctx.fillRect(0,0,canvas.width, canvas.height);
-        
-        // Lanes
-        ctx.strokeStyle = "rgba(255,255,255,0.3)";
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(this.laneWidth, 0); ctx.lineTo(this.laneWidth, canvas.height);
-        ctx.moveTo(this.laneWidth*2, 0); ctx.lineTo(this.laneWidth*2, canvas.height);
-        ctx.stroke();
-
-        // Draw Player (Wombat)
-        const px = (state.player.lane * this.laneWidth) + (this.laneWidth/2);
-        ctx.font = "50px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🐨", px, state.player.y + 30);
-
-        // Draw Question (On HUD mostly, but let's put it on top of screen)
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(0, 60, canvas.width, 60);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 40px Arial";
-        ctx.fillText(state.question.q + " = ?", canvas.width/2, 90);
-
-        // Draw Gates
-        state.answers.forEach(g => {
-            const gx = g.lane * this.laneWidth;
-            
-            // Gate visual
-            ctx.fillStyle = g.hit ? (g.isCorrect ? "green" : "red") : "#3e2723";
-            ctx.fillRect(gx + 10, g.y, this.laneWidth - 20, 20);
-            
-            // Text visual
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(gx + 20, g.y - 40, this.laneWidth - 40, 40);
-            ctx.fillStyle = "#000";
-            ctx.font = "bold 24px Arial";
-            ctx.fillText(g.val, gx + (this.laneWidth/2), g.y - 20);
-        });
-    },
-    input: function(x) {
-        if(x < canvas.width / 2) {
-            if(state.player.lane > 0) state.player.lane--;
-        } else {
-            if(state.player.lane < 2) state.player.lane++;
+        function hideAllGameScreens() {
+            const screens = document.querySelectorAll('.game-screen');
+            screens.forEach(s => s.style.display = 'none');
         }
-    }
-};
 
-function spawnGates() {
-    const correctLane = Math.floor(Math.random()*3);
-    for(let i=0; i<3; i++) {
-        let val;
-        if(i === correctLane) val = state.question.a;
-        else val = state.question.a + (Math.floor(Math.random()*10)-5);
-        if(val === state.question.a && i !== correctLane) val += 1; // Prevent duplicate correct
+        function openGame(gameName) {
+            document.getElementById('main-menu').style.display = 'none';
+            hideAllGameScreens();
 
-        state.answers.push({
-            lane: i,
-            y: -100, // Start above screen
-            val: val,
-            isCorrect: (i === correctLane),
-            hit: false
-        });
-    }
-}
-
-// --- GAME: ASTRO BLASTER ---
-const ASTRO = {
-    init: function() {
-        state.player.x = canvas.width / 2;
-        state.player.y = canvas.height - 80;
-        state.question = { q: "Multiples of 2", target: 2 }; // Start easy
-        state.answers = [];
-        state.speed = 2;
-        document.getElementById('controlsHint').innerText = "Tap falling rocks matching the rule!";
-        changeAstroRule();
-    },
-    update: function() {
-        // Spawn rocks
-        if(Math.random() < 0.02) spawnRock();
-        
-        // Move rocks
-        for(let i = state.answers.length - 1; i >= 0; i--) {
-            let r = state.answers[i];
-            r.y += r.speed;
-            
-            // If hits bottom
-            if(r.y > canvas.height) {
-                state.answers.splice(i, 1);
-                // If we missed a correct one, lose life? Maybe too hard.
-                // Let's just ignore misses for now, focus on correct hits.
+            if (gameName === 'wombat') {
+                document.getElementById('wombat-screen').style.display = 'block';
+                initWombat();
+            } else if (gameName === 'times') {
+                document.getElementById('times-screen').style.display = 'block';
+                startTimesGame();
+            } else if (gameName === 'place') {
+                document.getElementById('place-screen').style.display = 'block';
+                startPlaceGame();
             }
         }
-    },
-    draw: function() {
-        // Space BG
-        ctx.fillStyle = "#1a237e";
-        ctx.fillRect(0,0,canvas.width, canvas.height);
-        
-        // Draw Ship
-        ctx.font = "60px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("🚀", canvas.width/2, canvas.height - 40);
 
-        // Draw Rule
-        ctx.fillStyle = "rgba(255,255,255,0.2)";
-        ctx.fillRect(0, canvas.height - 140, canvas.width, 40);
-        ctx.fillStyle = "#ffeb3b";
-        ctx.font = "bold 24px Arial";
-        ctx.fillText("SHOOT: " + state.question.q, canvas.width/2, canvas.height - 110);
+        function goHome() {
+            hideAllGameScreens();
+            document.getElementById('main-menu').style.display = 'block';
+        }
 
-        // Draw Rocks
-        state.answers.forEach(r => {
-            ctx.fillStyle = "#795548";
-            ctx.beginPath();
-            ctx.arc(r.x, r.y, 30, 0, Math.PI*2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 20px Arial";
-            ctx.textBaseline = "middle";
-            ctx.fillText(r.val, r.x, r.y);
-        });
-    },
-    input: function(x, y) {
-        // Check tap on rock
-        for(let i = state.answers.length - 1; i >= 0; i--) {
-            let r = state.answers[i];
-            const dist = Math.hypot(r.x - x, r.y - y);
-            if(dist < 50) { // Hit
-                // Check logic
-                let isCorrect = false;
-                if(state.question.type === 'mult') {
-                    if(r.val % state.question.target === 0) isCorrect = true;
-                } else if (state.question.type === 'odd') {
-                    if(r.val % 2 !== 0) isCorrect = true;
+        /* ---------- GAME 1: Wombat Walk ---------- */
+        let wombatCurrentMode = 'add';
+        let wombatNum1, wombatNum2, wombatCorrectAnswer;
+        let wombatScore = 0;
+        const wombatWinningScore = 10;
+
+        const wombatEl = document.getElementById('wombat-wombat');
+        const wombatQuestionEl = document.getElementById('wombat-question');
+        const wombatAnswerInput = document.getElementById('wombat-answer');
+        const wombatMessageEl = document.getElementById('wombat-message');
+        const wombatScoreEl = document.getElementById('wombat-score');
+        const wombatTargetScoreEl = document.getElementById('wombat-target-score');
+
+        const wombatModeButtons = {
+            add: document.getElementById('wombat-mode-add'),
+            sub: document.getElementById('wombat-mode-sub'),
+            mul: document.getElementById('wombat-mode-mul')
+        };
+
+        wombatTargetScoreEl.innerText = wombatWinningScore;
+
+        if (wombatAnswerInput) {
+            wombatAnswerInput.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    wombatCheckAnswer();
                 }
-                
-                if(isCorrect) {
-                    state.score += 5;
-                    playSound('correct');
-                    // Sparkle effect could go here
-                } else {
-                    state.lives--;
-                    playSound('wrong');
-                    checkGameOver();
-                }
-                state.answers.splice(i, 1);
-                
-                if(state.score > 0 && state.score % 20 === 0) changeAstroRule();
+            });
+        }
+
+        function initWombat() {
+            wombatSetMode('add'); // sets score + question
+            wombatMessageEl.innerText = '';
+        }
+
+        function wombatSetMode(mode) {
+            wombatCurrentMode = mode;
+            wombatScore = 0;
+            wombatScoreEl.innerText = wombatScore;
+            wombatUpdatePosition();
+            // Highlight active mode
+            Object.keys(wombatModeButtons).forEach(m => {
+                wombatModeButtons[m].classList.toggle('active', m === mode);
+            });
+            wombatGenerateQuestion();
+        }
+
+        function wombatGenerateQuestion() {
+            wombatMessageEl.innerText = '';
+            wombatMessageEl.className = 'message';
+            wombatAnswerInput.value = '';
+            wombatAnswerInput.focus();
+
+            if (wombatCurrentMode === 'add') {
+                // Year 3: sums up to about 30
+                wombatNum1 = Math.floor(Math.random() * 15) + 1;
+                wombatNum2 = Math.floor(Math.random() * 15) + 1;
+                wombatCorrectAnswer = wombatNum1 + wombatNum2;
+                wombatQuestionEl.innerText = `${wombatNum1} + ${wombatNum2} = ?`;
+            } else if (wombatCurrentMode === 'sub') {
+                // Answer positive, up to around 20–25
+                wombatNum1 = Math.floor(Math.random() * 20) + 5;
+                wombatNum2 = Math.floor(Math.random() * wombatNum1);
+                wombatCorrectAnswer = wombatNum1 - wombatNum2;
+                wombatQuestionEl.innerText = `${wombatNum1} − ${wombatNum2} = ?`;
+            } else if (wombatCurrentMode === 'mul') {
+                // Focus on 2, 3, 5, 10
+                const factors = [2, 3, 5, 10];
+                wombatNum1 = factors[Math.floor(Math.random() * factors.length)];
+                wombatNum2 = Math.floor(Math.random() * 10) + 1;
+                wombatCorrectAnswer = wombatNum1 * wombatNum2;
+                wombatQuestionEl.innerText = `${wombatNum1} × ${wombatNum2} = ?`;
+            }
+        }
+
+        function wombatCheckAnswer() {
+            const playerAns = parseInt(wombatAnswerInput.value, 10);
+
+            if (Number.isNaN(playerAns)) {
+                wombatMessageEl.innerText = 'Pop in a number first 🙂';
+                wombatMessageEl.className = 'message wrong';
                 return;
             }
+
+            if (playerAns === wombatCorrectAnswer) {
+                wombatMessageEl.innerText = 'Nice step! 🌟';
+                wombatMessageEl.className = 'message correct';
+                wombatScore++;
+                wombatScoreEl.innerText = wombatScore;
+                wombatUpdatePosition();
+
+                if (wombatScore >= wombatWinningScore) {
+                    wombatQuestionEl.innerText = 'You reached Black Mountain! 🎉';
+                    fireConfetti(2500);
+                    setTimeout(() => {
+                        wombatScore = 0;
+                        wombatScoreEl.innerText = wombatScore;
+                        wombatUpdatePosition();
+                        wombatGenerateQuestion();
+                        wombatMessageEl.innerText = '';
+                    }, 2600);
+                } else {
+                    setTimeout(wombatGenerateQuestion, 800);
+                }
+            } else {
+                wombatMessageEl.innerText = `Close! Try again. Hint: the answer is ${wombatCorrectAnswer}.`;
+                wombatMessageEl.className = 'message wrong';
+                // Show them the answer, then move on
+                setTimeout(wombatGenerateQuestion, 1400);
+            }
         }
-    }
-};
 
-function changeAstroRule() {
-    const rules = [
-        { q: "Even Numbers", type: "mult", target: 2 },
-        { q: "Multiples of 5", type: "mult", target: 5 },
-        { q: "Multiples of 10", type: "mult", target: 10 },
-        { q: "Multiples of 3", type: "mult", target: 3 }
-    ];
-    state.question = rules[Math.floor(Math.random()*rules.length)];
-}
-
-function spawnRock() {
-    // Generate number based on rule (sometimes correct, sometimes not)
-    let val;
-    const isTarget = Math.random() > 0.6; // 40% chance of being a target
-    
-    if(isTarget) {
-        val = (Math.floor(Math.random()*10)+1) * state.question.target;
-    } else {
-        val = Math.floor(Math.random()*50)+1;
-        // Ensure it's not accidentally correct
-        if(val % state.question.target === 0) val++; 
-    }
-
-    state.answers.push({
-        x: Math.random() * (canvas.width - 60) + 30,
-        y: -50,
-        val: val,
-        speed: Math.random() * 2 + 1
-    });
-}
-
-// --- GLOBAL ENGINE LOOPS ---
-function startGame(mode) {
-    gameMode = mode;
-    state.score = 0;
-    state.lives = 3;
-    state.isPlaying = true;
-    
-    document.getElementById('menu').classList.add('hidden');
-    document.getElementById('gameover').classList.add('hidden');
-    document.getElementById('hud').classList.remove('hidden');
-    
-    if(mode === 'runner') RUNNER.init();
-    if(mode === 'astro') ASTRO.init();
-    
-    if(animationId) cancelAnimationFrame(animationId);
-    loop();
-}
-
-function loop() {
-    if(!state.isPlaying) return;
-    
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    
-    if(gameMode === 'runner') {
-        RUNNER.update();
-        RUNNER.draw();
-    } else if (gameMode === 'astro') {
-        ASTRO.update();
-        ASTRO.draw();
-    }
-    
-    updateHUD();
-    animationId = requestAnimationFrame(loop);
-}
-
-function updateHUD() {
-    document.getElementById('scoreDisplay').innerText = state.score;
-    document.getElementById('livesDisplay').innerText = "❤️".repeat(state.lives);
-}
-
-function checkGameOver() {
-    if(state.lives <= 0) {
-        state.isPlaying = false;
-        document.getElementById('gameover').classList.remove('hidden');
-        document.getElementById('finalScore').innerText = state.score;
-        
-        // High Score
-        const saved = localStorage.getItem('mathHeroScore') || 0;
-        if(state.score > saved) {
-            localStorage.setItem('mathHeroScore', state.score);
-            document.getElementById('highScoreMsg').innerText = "NEW HIGH SCORE! 🏆";
-        } else {
-            document.getElementById('highScoreMsg').innerText = `Best: ${saved}`;
+        function wombatUpdatePosition() {
+            // Move wombat from about 5% to 85% based on score (0–winningScore)
+            const percentage = 5 + (wombatScore / wombatWinningScore) * 80;
+            wombatEl.style.left = percentage + '%';
         }
-    }
-}
 
-function restartGame() {
-    startGame(gameMode);
-}
+        /* ---------- GAME 2: Times Table Jump ---------- */
+        let timesCurrentTable = 'mix';
+        let timesCorrectAnswer = null;
+        let timesScore = 0;
+        let timesStreak = 0;
 
-// --- INPUT HANDLING ---
-canvas.addEventListener('mousedown', handleInput);
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent scrolling
-    handleInput(e.touches[0]);
-}, {passive: false});
+        const timesQuestionEl = document.getElementById('times-question');
+        const timesScoreEl = document.getElementById('times-score');
+        const timesStreakEl = document.getElementById('times-streak');
+        const timesMessageEl = document.getElementById('times-message');
+        const timesButtons = [
+            document.getElementById('times-opt-0'),
+            document.getElementById('times-opt-1'),
+            document.getElementById('times-opt-2')
+        ];
 
-function handleInput(e) {
-    if(!state.isPlaying) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    if(gameMode === 'runner') RUNNER.input(x);
-    if(gameMode === 'astro') ASTRO.input(x, y);
-}
+        const timesTableButtons = {
+            mix: document.getElementById('times-table-mix'),
+            2: document.getElementById('times-table-2'),
+            3: document.getElementById('times-table-3'),
+            5: document.getElementById('times-table-5'),
+            10: document.getElementById('times-table-10')
+        };
 
-</script>
+        function startTimesGame() {
+            timesScore = 0;
+            timesStreak = 0;
+            timesScoreEl.innerText = timesScore;
+            timesStreakEl.innerText = timesStreak;
+            timesMessageEl.innerText = '';
+            setTimesTable('mix');
+        }
+
+        function setTimesTable(table) {
+            timesCurrentTable = table;
+            // Highlight active button
+            Object.keys(timesTableButtons).forEach(key => {
+                timesTableButtons[key].classList.toggle('active', String(key) === String(table));
+            });
+            timesScore = 0;
+            timesStreak = 0;
+            timesScoreEl.innerText = timesScore;
+            timesStreakEl.innerText = timesStreak;
+            timesMessageEl.innerText = '';
+            generateTimesQuestion();
+        }
+
+        function generateTimesQuestion() {
+            const tables = [2, 3, 5, 10];
+            let a;
+            if (timesCurrentTable === 'mix') {
+                a = tables[Math.floor(Math.random() * tables.length)];
+            } else {
+                a = parseInt(timesCurrentTable, 10);
+            }
+            const b = Math.floor(Math.random() * 10) + 1; // 1–10
+
+            timesCorrectAnswer = a * b;
+            timesQuestionEl.innerText = `${a} × ${b} = ?`;
+            timesMessageEl.innerText = '';
+
+            // Build options: correct + 2 nearby numbers
+            const options = [timesCorrectAnswer];
+            while (options.length < 3) {
+                const delta = Math.floor(Math.random() * 5) + 1; // 1–5
+                const sign = Math.random() < 0.5 ? -1 : 1;
+                const candidate = timesCorrectAnswer + sign * delta;
+                if (candidate > 0 && !options.includes(candidate)) {
+                    options.push(candidate);
+                }
+            }
+
+            // Shuffle
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            // Apply to buttons
+            options.forEach((val, idx) => {
+                const btn = timesButtons[idx];
+                btn.innerText = val;
+                btn.dataset.value = String(val);
+            });
+        }
+
+        function timesCheckAnswer(btn) {
+            const chosen = parseInt(btn.dataset.value, 10);
+            if (chosen === timesCorrectAnswer) {
+                timesScore++;
+                timesStreak++;
+                timesScoreEl.innerText = timesScore;
+                timesStreakEl.innerText = timesStreak;
+                timesMessageEl.innerText = 'Boom! Nailed it. 💥';
+                timesMessageEl.className = 'message correct';
+
+                if (timesScore % 10 === 0) {
+                    fireConfetti();
+                }
+
+                setTimeout(generateTimesQuestion, 800);
+            } else {
+                timesStreak = 0;
+                timesStreakEl.innerText = timesStreak;
+                timesMessageEl.innerText = `Not quite. The answer was ${timesCorrectAnswer}.`;
+                timesMessageEl.className = 'message wrong';
+                setTimeout(generateTimesQuestion, 1300);
+            }
+        }
+
+        /* ---------- GAME 3: Place Value Patrol ---------- */
+        let placeCorrectDigit = null;
+        let placeScore = 0;
+
+        const placeNumberEl = document.getElementById('place-number');
+        const placeQuestionEl = document.getElementById('place-question');
+        const placeScoreEl = document.getElementById('place-score');
+        const placeMessageEl = document.getElementById('place-message');
+        const placeButtons = [
+            document.getElementById('place-opt-0'),
+            document.getElementById('place-opt-1'),
+            document.getElementById('place-opt-2')
+        ];
+
+        function startPlaceGame() {
+            placeScore = 0;
+            placeScoreEl.innerText = placeScore;
+            placeMessageEl.innerText = '';
+            generatePlaceQuestion();
+        }
+
+        function generatePlaceQuestion() {
+            placeMessageEl.innerText = '';
+            placeMessageEl.className = 'message';
+
+            // Random 3-digit number, leading digit 1–9
+            const hundreds = Math.floor(Math.random() * 9) + 1;
+            const tens = Math.floor(Math.random() * 10);
+            const ones = Math.floor(Math.random() * 10);
+            const number = hundreds * 100 + tens * 10 + ones;
+            placeNumberEl.innerText = number;
+
+            const placeTypes = [
+                { key: 'hundreds', label: 'hundreds digit', value: hundreds },
+                { key: 'tens', label: 'tens digit', value: tens },
+                { key: 'ones', label: 'ones digit', value: ones }
+            ];
+            const chosen = placeTypes[Math.floor(Math.random() * placeTypes.length)];
+            placeCorrectDigit = chosen.value;
+            placeQuestionEl.innerText = `What is the ${chosen.label}?`;
+
+            const options = [placeCorrectDigit];
+            while (options.length < 3) {
+                const candidate = Math.floor(Math.random() * 10); // 0–9
+                if (!options.includes(candidate)) {
+                    options.push(candidate);
+                }
+            }
+
+            // Shuffle
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            options.forEach((val, idx) => {
+                const btn = placeButtons[idx];
+                btn.innerText = val;
+                btn.dataset.value = String(val);
+            });
+        }
+
+        function placeCheckAnswer(btn) {
+            const chosen = parseInt(btn.dataset.value, 10);
+            if (chosen === placeCorrectDigit) {
+                placeScore++;
+                placeScoreEl.innerText = placeScore;
+                placeMessageEl.innerText = 'Spot on! 🦜';
+                placeMessageEl.className = 'message correct';
+
+                if (placeScore % 10 === 0) {
+                    fireConfetti();
+                }
+
+                setTimeout(generatePlaceQuestion, 900);
+            } else {
+                placeMessageEl.innerText = `Nice try. The correct digit was ${placeCorrectDigit}.`;
+                placeMessageEl.className = 'message wrong';
+                setTimeout(generatePlaceQuestion, 1300);
+            }
+        }
+    </script>
 </body>
 </html>
